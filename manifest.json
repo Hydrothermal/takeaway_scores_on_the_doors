@@ -1,14 +1,15 @@
 {
   "name": "JUST EAT Scores on the Doors",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "manifest_version": 2,
   "description": "Shows the Scores on the Doors rating next to each takeaway restaurant.",
   "author": "Anargyros Akrivos",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   },
+  "web_accessible_resources": [ "images/scores/*" ],
   "background": {
     "scripts": [ "js/jquery.js", "js/fuzzyset.js", "src/eventPage.js" ],
     "persistent": false
@@ -16,10 +17,9 @@
   "content_scripts": [
     {
       "js": [ "js/jquery.js", "src/inject.js" ],
+      "css": [ "css/styles.css" ],
       "matches": [ "https://www.just-eat.co.uk/area/*" ]
     }
   ],
-  "permissions": [
-    "http://api.ratings.food.gov.uk/*"
-  ]
+  "permissions": [ "http://api.ratings.food.gov.uk/*" ]
 }

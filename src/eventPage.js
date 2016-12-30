@@ -1,5 +1,5 @@
 function getScoreImage(ratingKey = "fhrs_0_en-gb", type = "small") {
-  return "http://ratings.food.gov.uk/images/scores/" + type + "/" + ratingKey + ".JPG";
+  return chrome.extension.getURL("images/scores/" + ratingKey + ".jpg");
 }
 
 function getBusinessPage(id) {
@@ -7,49 +7,43 @@ function getBusinessPage(id) {
 }
 
 function getScoreData(name, postcode, callback) {
-  $.ajax({
+  jQuery.ajax({
     url: "http://api.ratings.food.gov.uk/Establishments?address=" + encodeURIComponent(postcode),
     type: "GET",
     dataType: "json",
     headers: { "x-api-version": 2 }
-  }).success(callback);
+  }).done(callback);
 }
 
-function parseBusinessInfo(name, postcode, data) {
-  var msg = {
+function generateBusinessInfo(name, postcode, business) {
+  var businessInfo = {
     name: name,
     score: "AwaitingInspection",
     imageUrl: getScoreImage("fhrs_awaitinginspection_en-gb"),
     businessUrl: "http://ratings.food.gov.uk/enhanced-search/en-GB/%5E/" + postcode + "/Relevance/0/%5E/%5E/1/1/10"
   };
-  if (data.establishments.length == 1) {
-    var business = data.establishments[0];
-    msg.name = business.BusinessName;
-    msg.score = business.RatingValue;
-    msg.imageUrl = getScoreImage(business.RatingKey);
-    msg.businessUrl = getBusinessPage(business.FHRSID);
-  } else {
-    var names = FuzzySet();
-    for (var i = 0; i < data.establishments.length; i++) {
-      var business = data.establishments[i];
-      names.add(business.BusinessName);
-    }
-    var similar = names.get(name);
-    if (similar) {
-      var matchedName = similar[0][1]
-      for (var i = 0; i < data.establishments.length; i++) {
-        var business = data.establishments[i];
-        if (business.BusinessName == matchedName) {
-          msg.name = business.BusinessName;
-          msg.score = business.RatingValue;
-          msg.imageUrl = getScoreImage(business.RatingKey);
-          msg.businessUrl = getBusinessPage(business.FHRSID);
-          break;
-        }
-      }
-    }
+  if (business) {
+    businessInfo.name = business.BusinessName;
+    businessInfo.score = business.RatingValue;
+    businessInfo.imageUrl = getScoreImage(business.RatingKey);
+    businessInfo.businessUrl = getBusinessPage(business.FHRSID);
   }
-  return msg;
+  return businessInfo;
+}
+
+function parseBusinessInfo(name, postcode, data) {
+  var names = FuzzySet();
+  data.establishments.forEach(function(business) {
+    names.add(business.BusinessName);
+  });
+  var similar = names.get(name);
+  if (similar) {
+    var business = data.establishments.find(function(business) {
+      return business.BusinessName == similar[0][1];
+    });
+    return generateBusinessInfo(name, postcode, business);
+  }
+  return generateBusinessInfo(name, postcode, undefined);
 }
 
 chrome.runtime.onConnect.addListener(function(port) {
