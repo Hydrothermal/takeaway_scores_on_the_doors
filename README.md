@@ -16,4 +16,4 @@ Please note that this plugin is *not perfect* and sometimes there might be some 
 
 ## How it looks
 
-![image](preview.png)
+![image](screenshot.png)
