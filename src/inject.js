@@ -13,6 +13,6 @@ $("div[data-ft='searchResultOpenRestaurantCard']").each(function(index, element)
   var jeId = $(this).attr("data-restaurant-id");
   var name = $(this).find("h2[data-ft='restaurantDetailsName']").text().trim();
   var postcode = ($(this).find("p[data-ft='restaurantDetailsAddress']").text().trim().match(postcodeRegex) || [''])[0];
-  $('<div id="sotd_' + jeId + '" class="sotd"><div class="loader"/></div>').prependTo($(this).find("div.o-tile__aside"));
+  $("<div id='sotd_" + jeId + "' class='sotd'><div class='loader'/></div>").prependTo($(this).find("div.o-tile__aside"));
   port.postMessage({ jeId: jeId, name: name, postcode: postcode });
 });
