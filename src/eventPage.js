@@ -20,16 +20,11 @@ function getScoreDataFromPostcode(postcode) {
 }
 
 function getMatchingBusiness(msg, data) {
-  var names = FuzzySet();
-  data.establishments.forEach(function(business) {
-    names.add(business.BusinessName);
-  });
+  var businesses = data.establishments.map(business => business.BusinessName);
+  var names = FuzzySet(businesses, useLevenshtein = false);
   var similar = names.get(msg.name);
-  if (similar) {
-    var business = data.establishments.find(function(business) {
-      return business.BusinessName == similar[0][1];
-    });
-    return business;
+  if (similar && similar[0][0] >= 0.4) {
+    return data.establishments.find(business => business.BusinessName == similar[0][1]);
   }
   return null;
 }
@@ -51,19 +46,13 @@ function getBusinessInfo(msg, business) {
   return businessInfo;
 }
 
-chrome.runtime.onConnect.addListener(function(port) {
-  port.onMessage.addListener(function(msg) {
+chrome.runtime.onConnect.addListener(port => {
+  port.onMessage.addListener(msg => {
     if (msg.jeId && msg.name && msg.postcode) {
       getScoreData(msg)
-        .then(function(data) {
-          return getMatchingBusiness(msg, data);
-        })
-        .then(function(business) {
-          return getBusinessInfo(msg, business);
-        })
-        .then(function(businessInfo) {
-          port.postMessage(businessInfo);
-        });
+        .then(data => getMatchingBusiness(msg, data))
+        .then(business => getBusinessInfo(msg, business))
+        .then(businessInfo => port.postMessage(businessInfo))
     }
   });
 });
