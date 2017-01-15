@@ -6,8 +6,12 @@ function getBusinessPage(id) {
   return "http://ratings.food.gov.uk/business/en-GB/" + id;
 }
 
-function getScoreData(msg) {
-  return getScoreDataFromPostcode(msg.postcode);
+function getLatLngFromPostcode(postcode) {
+  return jQuery.ajax({
+    url: "https://api.postcodes.io/postcodes/" + encodeURIComponent(postcode),
+    type: "GET",
+    dataType: "json"
+  }).promise();
 }
 
 function getScoreDataFromPostcode(postcode) {
@@ -16,20 +20,49 @@ function getScoreDataFromPostcode(postcode) {
     type: "GET",
     dataType: "json",
     headers: { "x-api-version": 2 }
+  }).promise();
+}
+
+function getScoreDataFromLatLng(lat, lng) {
+  return jQuery.ajax({
+    url: "http://api.ratings.food.gov.uk/Establishments?maxDistanceLimit=1&pageSize=1000&sortOptionKey=Distance&latitude=" + lat + "&longitude=" + lng,
+    type: "GET",
+    dataType: "json",
+    headers: { "x-api-version": 2 }
+  }).promise();
+}
+
+function getMatchingBusiness(msg, data, similarity = 0.4) {
+  return new Promise((resolve, reject) => {
+    var businesses = data.establishments.map(business => business.BusinessName);
+    var names = FuzzySet(businesses, useLevenshtein = false);
+    var similar = names.get(msg.name);
+    if (similar && similar[0][0] >= similarity) {
+      return resolve(data.establishments.find(business => business.BusinessName == similar[0][1]));
+    }
+    return resolve(undefined);
   });
 }
 
-function getMatchingBusiness(msg, data) {
-  var businesses = data.establishments.map(business => business.BusinessName);
-  var names = FuzzySet(businesses, useLevenshtein = false);
-  var similar = names.get(msg.name);
-  if (similar && similar[0][0] >= 0.4) {
-    return data.establishments.find(business => business.BusinessName == similar[0][1]);
-  }
-  return null;
+function getBusinessFromPostcode(msg) {
+  return getScoreDataFromPostcode(msg.postcode)
+    .then(data => getMatchingBusiness(msg, data));
 }
 
-function getBusinessInfo(msg, business) {
+function getBusinessFromLatLng(msg) {
+  return getLatLngFromPostcode(msg.postcode)
+    .then(data => getScoreDataFromLatLng(data.result.latitude, data.result.longitude))
+    .then(data => getMatchingBusiness(msg, data, similarity = 0.5));
+}
+
+function getBusiness(msg) {
+  return getBusinessFromPostcode(msg)
+    .then(business => {
+      return business || getBusinessFromLatLng(msg);
+    });
+}
+
+function extractBusinessInfo(msg, business) {
   var businessInfo = {
     jeId: msg.jeId,
     name: msg.name,
@@ -49,9 +82,8 @@ function getBusinessInfo(msg, business) {
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(msg => {
     if (msg.jeId && msg.name && msg.postcode) {
-      getScoreData(msg)
-        .then(data => getMatchingBusiness(msg, data))
-        .then(business => getBusinessInfo(msg, business))
+      getBusiness(msg)
+        .then(business => extractBusinessInfo(msg, business))
         .then(businessInfo => port.postMessage(businessInfo))
     }
   });

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "JUST EAT Scores on the Doors",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Anargyros Akrivos",
   "description": "Shows the Scores on the Doors rating next to each takeaway restaurant.",
   "icons": {
@@ -21,6 +21,9 @@
       "matches": [ "https://www.just-eat.co.uk/area/*" ]
     }
   ],
-  "permissions": [ "http://api.ratings.food.gov.uk/*" ],
+  "permissions": [
+    "http://api.ratings.food.gov.uk/*",
+    "https://api.postcodes.io/postcodes/*"
+  ],
   "web_accessible_resources": [ "images/scores/*" ]
 }

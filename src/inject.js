@@ -3,7 +3,7 @@ var postcodeRegex = /[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}/gi;
 var port = chrome.runtime.connect({ name: "je" });
 
 port.onMessage.addListener(msg => {
-  var title = msg.name + " (" + msg.score + "/5)";
+  var title = msg.name + " (" + msg.score + ")";
   var img = "<img src='" + msg.imageUrl + "' alt='" + title + "' title='" + title + "'>";
   var link = "<a href='" + msg.businessUrl + "' target='_blank'>" + img + "</a>"
   $("div#sotd_" + msg.jeId).html(link);
