@@ -24,6 +24,7 @@ Please note that this extension is *not perfect* and sometimes there might be so
 
 ### JUST EAT
 ![image](ss_just_eat.png)
+![image](ss_just_eat2.png)
 
 ### Deliveroo
 ![image](ss_deliveroo.png)
