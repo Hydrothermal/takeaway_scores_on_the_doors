@@ -64,7 +64,7 @@ function getBusiness(msg) {
 
 function extractBusinessInfo(msg, business) {
   var businessInfo = {
-    jeId: msg.jeId,
+    rId: msg.rId,
     name: msg.name,
     score: "AwaitingInspection",
     imageUrl: getScoreImage("fhrs_awaitinginspection_en-gb"),
@@ -81,7 +81,7 @@ function extractBusinessInfo(msg, business) {
 
 chrome.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(msg => {
-    if (msg.jeId && msg.name && msg.postcode) {
+    if (msg.rId && msg.name && msg.postcode) {
       getBusiness(msg)
         .then(business => extractBusinessInfo(msg, business))
         .then(businessInfo => port.postMessage(businessInfo))

@@ -2,7 +2,7 @@
 
 var FuzzySet = function(arr, useLevenshtein, gramSizeLower, gramSizeUpper) {
     var fuzzyset = {
-        version: '0.0.1'
+
     };
 
     // default options
@@ -50,7 +50,7 @@ var FuzzySet = function(arr, useLevenshtein, gramSizeLower, gramSizeUpper) {
             return 1 - distance / str2.length;
         }
     };
-    var _nonWordRe = /[^\w, ]+/;
+    var _nonWordRe = /[^a-zA-Z0-9\u00C0-\u00FF, ]+/g;
 
     var _iterateGrams = function(value, gramSize) {
         gramSize = gramSize || 2;
@@ -85,16 +85,19 @@ var FuzzySet = function(arr, useLevenshtein, gramSizeLower, gramSizeUpper) {
     };
 
     // the main functions
-    fuzzyset.get = function(value, defaultValue) {
+    fuzzyset.get = function(value, defaultValue, minMatchScore) {
         // check for value in set, returning defaultValue or null if none found
-        var result = this._get(value);
+        if (minMatchScore === undefined) {
+            minMatchScore = .33
+        }
+        var result = this._get(value, minMatchScore);
         if (!result && typeof defaultValue !== 'undefined') {
             return defaultValue;
         }
         return result;
     };
 
-    fuzzyset._get = function(value) {
+    fuzzyset._get = function(value, minMatchScore) {
         var normalizedValue = this._normalizeStr(value),
             result = this.exactSet[normalizedValue];
         if (result) {
@@ -104,15 +107,15 @@ var FuzzySet = function(arr, useLevenshtein, gramSizeLower, gramSizeUpper) {
         var results = [];
         // start with high gram size and if there are no results, go to lower gram sizes
         for (var gramSize = this.gramSizeUpper; gramSize >= this.gramSizeLower; --gramSize) {
-            results = this.__get(value, gramSize);
-            if (results) {
+            results = this.__get(value, gramSize, minMatchScore);
+            if (results && results.length > 0) {
                 return results;
             }
         }
         return null;
     };
 
-    fuzzyset.__get = function(value, gramSize) {
+    fuzzyset.__get = function(value, gramSize, minMatchScore) {
         var normalizedValue = this._normalizeStr(value),
             matches = {},
             gramCounts = _gramCounter(normalizedValue, gramSize),
@@ -181,11 +184,11 @@ var FuzzySet = function(arr, useLevenshtein, gramSizeLower, gramSizeUpper) {
             results.sort(sortDescending);
         }
         var newResults = [];
-        for (var i = 0; i < results.length; ++i) {
-            if (results[i][0] == results[0][0]) {
-                newResults.push([results[i][0], this.exactSet[results[i][1]]]);
+        results.forEach(function(scoreWordPair) {
+            if (scoreWordPair[0] >= minMatchScore) {
+                newResults.push([scoreWordPair[0], this.exactSet[scoreWordPair[1]]]);
             }
-        }
+        }.bind(this))
         return newResults;
     };
 

@@ -1,0 +1,22 @@
+{
+  "name": "takeaway_scores_on_the_doors",
+  "version": "2.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^1.0.2",
+    "grunt-crx": "^1.0.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/argyakrivos/takeaway_scores_on_the_doors.git"
+  },
+  "author": "Anargyros Akrivos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/argyakrivos/takeaway_scores_on_the_doors/issues"
+  },
+  "homepage": "https://github.com/argyakrivos/takeaway_scores_on_the_doors#readme"
+}

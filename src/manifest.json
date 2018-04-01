@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "JUST EAT Scores on the Doors",
-  "version": "1.1.0",
+  "name": "Takeaway Scores on the Doors",
+  "version": "2.0.0",
   "author": "Anargyros Akrivos",
-  "description": "Shows the Scores on the Doors rating next to each takeaway restaurant.",
+  "description": "Shows the Scores on the Doors rating next to each takeaway restaurant for JUST EAT and Deliveroo.",
   "icons": {
     "16": "images/icons/icon16.png",
     "32": "images/icons/icon32.png",
@@ -11,14 +11,17 @@
     "128": "images/icons/icon128.png"
   },
   "background": {
-    "scripts": [ "js/jquery.js", "js/fuzzyset.js", "src/eventPage.js" ],
+    "scripts": [ "js/jquery.js", "js/fuzzyset.js", "js/event_page.js" ],
     "persistent": false
   },
   "content_scripts": [
     {
-      "js": [ "js/jquery.js", "src/inject.js" ],
+      "js": [ "js/jquery.js", "js/inject.js" ],
       "css": [ "css/styles.css" ],
-      "matches": [ "https://www.just-eat.co.uk/area/*" ]
+      "matches": [
+        "https://www.just-eat.co.uk/*",
+        "https://deliveroo.co.uk/*"
+      ]
     }
   ],
   "permissions": [
